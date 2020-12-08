@@ -17,6 +17,7 @@ TEST(WeatherTestCase, invalid_response) {
 
 TEST(WeatherTestCase, difference_string) {
     WeatherMock weather;
+	
     cpr::Response response1, response2;
 
     response1.status_code = 200;
@@ -25,24 +26,24 @@ TEST(WeatherTestCase, difference_string) {
     response1.text = "{\"list\" : [{\"main\": {\"temp\": 0}}]}";
     response2.text = "{\"list\" : [{\"main\": {\"temp\": 20}}]}";
 
-    EXPECT_CALL(weather, Get("London")).WillOnce(testing::Return(response1));
-    EXPECT_CALL(weather, Get("Sochi")).WillOnce(testing::Return(response2));
+    EXPECT_CALL(weather, Get("London")).WillRepeatedly(testing::Return(response1));
+    EXPECT_CALL(weather, Get("Sochi")).WillRepeatedly(testing::Return(response2));
 
     ASSERT_EQ(weather.GetDifferenceString("London", "Sochi"), "Weather in London is colder than in Sochi by 20 degrees");
     ASSERT_EQ(weather.GetDifferenceString("Sochi", "London"), "Weather in Sochi is warmer than in London by 20 degrees");
 
 }
 
-TEST(WeatherTestCase, ) {
+TEST(WeatherTestCase, find_dif) {
     WeatherMock weather;
     cpr::Response response;
-
+	
     response.status_code = 200;
 
     response.text = "{\"list\" : [{\"main\": {\"temp\": -5}}]}";
 
-    EXPECT_CALL(weather, Get("Dubki")).WillOnce(testing::Return(response));
-    EXPECT_CALL(weather, Get("Bondari")).WillOnce(testing::Return(response));
+    EXPECT_CALL(weather, Get("Dubki")).WillRepeatedly(testing::Return(response));
+    EXPECT_CALL(weather, Get("Bondari")).WillRepeatedly(testing::Return(response));
 
     ASSERT_EQ(weather.GetTemperature("Dubki"), -5);
     ASSERT_EQ(weather.FindDiffBetweenTwoCities("Dubki", "Bondari"), 0);

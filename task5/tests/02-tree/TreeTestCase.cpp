@@ -55,7 +55,7 @@ TEST(TreeTestCase, notEquals2) {
     ASSERT_FALSE(node1 == node2);
 }
 
-TEST(TreeTestCase, dirs_only) {
+TEST(TreeTestCase, dirs_only) { // 1
     FileNode node1;
     node1.name = "dir";
     node1.is_dir = true;
@@ -66,26 +66,22 @@ TEST(TreeTestCase, dirs_only) {
     ASSERT_EQ(GetTree("dir", true), node1);
 }
 
-TEST(TreeTestCase, not_dirs_only) {
-    FileNode node1;
-    node1.name = "dir1";
-    node1.is_dir = true;
-    boost::filesystem::create_directory("dir1");
+TEST(TreeTestCase, dirs_only_2) {
+  FileNode node1;
+  node1.name = "dir1";
+  node1.is_dir = true;
+  boost::filesystem::create_directory("dir1");
 
-    FileNode node2;
-    node2.name = "dir2";
-    node2.is_dir = true;
-    node1.children.push_back(node2);
-    boost::filesystem::create_directory("dir1/dir2");
+  boost::filesystem::ofstream file("dir1/f");
 
-    FileNode node3;
-    node3.name = "file";
-    node3.is_dir = false;
-    node1.children.push_back(node3);
-    boost::filesystem::ofstream file("dir1/file");
+  FileNode node2;
+  node2.name = "dir2";
+  node2.is_dir = true;
+  node1.children.push_back(node2);
+  boost::filesystem::create_directory("dir1/dir2");
 
-    boost::filesystem::remove_all("dir1/.DS_Store");
-    ASSERT_EQ(GetTree("dir1", false), node1);
+  ASSERT_EQ(GetTree("dir1", true), node1);
 }
+
 
 
