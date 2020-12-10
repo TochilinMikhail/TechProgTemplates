@@ -17,6 +17,7 @@ TEST(TreeTestCase, no_path) {
 TEST(TreeTestCase, file) {
     boost::filesystem::ofstream file("file");
     ASSERT_THROW(GetTree("file", true), std::invalid_argument);
+    boost::filesystem::remove_all("file");
 }
 
 TEST(TreeTestCase, equals) {
@@ -64,6 +65,7 @@ TEST(TreeTestCase, dirs_only) { // 1
     boost::filesystem::ofstream file("dir/file");
 
     ASSERT_EQ(GetTree("dir", true), node1);
+    boost::filesystem::remove_all("dir");
 }
 
 TEST(TreeTestCase, dirs_only_2) {
@@ -81,7 +83,5 @@ TEST(TreeTestCase, dirs_only_2) {
   boost::filesystem::create_directory("dir1/dir2");
 
   ASSERT_EQ(GetTree("dir1", true), node1);
+  boost::filesystem::remove_all("dir1");
 }
-
-
-
