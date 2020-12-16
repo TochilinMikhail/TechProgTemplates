@@ -6,82 +6,76 @@
 #include "TreeTestCase.h"
 #include "Tree.h"
 
-#include <boost/filesystem/fstream.hpp>
-#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem.hpp>
 
-TEST(TreeTestCase, no_path) {
-    ASSERT_THROW(GetTree("no_path", true), std::invalid_argument);
-    ASSERT_THROW(GetTree("no_path", false), std::invalid_argument);
+using boost::filesystem::ofstream;
+using boost::filesystem::remove_all;
+using boost::filesystem::rename;
+using boost::filesystem::create_directory;
+
+
+void TreeTestCase::SetUp() {
+
+  create_directory("dir");
+
+  create_directory("dir/dir_ch");
+
+  ofstream("dir/file");
 }
 
-TEST(TreeTestCase, file) {
-    boost::filesystem::ofstream file("file");
-    ASSERT_THROW(GetTree("file", true), std::invalid_argument);
-    boost::filesystem::remove_all("file");
+void TreeTestCase::TearDown() {
+  remove_all("dir");
 }
 
-TEST(TreeTestCase, equals) {
-    FileNode node1;
-    node1.name = "dir1";
-    node1.is_dir = true;
-
-    FileNode node2;
-    node2.name = "dir1";
-    node2.is_dir = true;
-
-    ASSERT_EQ(node1, node2);
+TEST_F(TreeTestCase, no_path) {
+  ASSERT_THROW(GetTree("dir/no_path", true), std::invalid_argument);
+  ASSERT_THROW(GetTree("dir/no_path", false), std::invalid_argument);
 }
 
-TEST(TreeTestCase, notEquals1) {
-    FileNode node1;
-    node1.name = "dir1";
-    node1.is_dir = true;
-
-    FileNode node2;
-    node2.name = "dir2";
-    node2.is_dir = true;
-
-    ASSERT_FALSE(node1 == node2);
+TEST_F(TreeTestCase, file) {
+  ASSERT_THROW(GetTree("dir/file", true), std::invalid_argument);
 }
 
-TEST(TreeTestCase, notEquals2) {
-    FileNode node1;
-    node1.name = "dir1";
-    node1.is_dir = true;
+TEST_F(TreeTestCase, equal_1) {
+  FileNode node;
+  node.name = "dir_ch";
+  node.is_dir = true;
 
-    FileNode node2;
-    node2.name = "dir1";
-    node2.is_dir = false;
-
-    ASSERT_FALSE(node1 == node2);
+  ASSERT_TRUE(GetTree("dir/dir_ch", true) == node);
 }
 
-TEST(TreeTestCase, dirs_only) { // 1
-    FileNode node1;
-    node1.name = "dir";
-    node1.is_dir = true;
+TEST_F(TreeTestCase, equal_2) {
+  FileNode node;
+  node.name = "dir_ch";
+  node.is_dir = true;
 
-    boost::filesystem::create_directory("dir");
-    boost::filesystem::ofstream file("dir/file");
-
-    ASSERT_EQ(GetTree("dir", true), node1);
-    boost::filesystem::remove_all("dir");
+  ASSERT_TRUE(GetTree("dir", true).children[0] == node);
 }
 
-TEST(TreeTestCase, dirs_only_2) {
-  FileNode node1;
-  node1.name = "dir1";
-  node1.is_dir = true;
-  boost::filesystem::create_directory("dir1");
+TEST_F(TreeTestCase, equal_3) {
+  FileNode node;
+  node.name = "dir";
+  node.is_dir = true;
+  
+  FileNode node_ch;
+  node_ch.name = "dir_ch";
+  node_ch.is_dir = true;
+  node.children.push_back(node_ch);
 
-  boost::filesystem::ofstream file("dir1/f");
+  ASSERT_TRUE(GetTree("dir", true) == node);
+}
 
-  FileNode node2;
-  node2.name = "dir2";
-  node2.is_dir = true;
-  node1.children.push_back(node2);
-  boost::filesystem::create_directory("dir1/dir2");
+TEST_F(TreeTestCase, ch_size_1) {
 
-  ASSERT_EQ(GetTree("dir1", true), node1);
-  boost::filesystem::remove_all("dir1");
+  ASSERT_TRUE(GetTree("dir", true).children.size() == 1);
+}
+
+TEST_F(TreeTestCase, ch_size_2) {
+
+  ASSERT_TRUE(GetTree("dir/dir_ch", true).children.size() == 0);
+}
+
+TEST_F(TreeTestCase, ch_size_3) {
+
+  ASSERT_TRUE(GetTree("dir", false).children.size() == 2);
 }
